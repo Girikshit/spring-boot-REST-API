@@ -52,4 +52,12 @@ public class StudentService {
             student.setEmail(email);
         }
     }
+
+    public Student getStudent(Long id) {
+        Optional<Student> studentOptional = studentRepository.findById(id);
+        if(studentOptional.isEmpty()){
+            throw new IllegalStateException("Cannot find student with id: "+ id );
+        }
+        return studentOptional.get();
+    }
 }
