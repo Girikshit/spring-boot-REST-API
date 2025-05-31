@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Database</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 2rem;
+        }
+        button {
+          margin: 0.5rem;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1rem;
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 0.5rem;
+          text-align: left;
+        }
+        .form-group {
+          margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Student Management</h1>
+
+<div>
+    <button hx-get="/api/student/" hx-target="#output" hx-swap="innerHTML">Get All Students</button>
+</div>
+
+<!-- Get One Student -->
+<h3>Get Student by ID</h3>
+<form onsubmit="event.preventDefault(); htmx.ajax('GET', '/api/student/' + this.id.value, {target: '#output', swap: 'innerHTML'})">
+    <input type="number" name="id" required placeholder="Student ID">
+    <button type="submit">Get Student</button>
+</form>
+
+<!-- Add Student (POST with JSON) -->
+<h3>Add Student</h3>
+<form hx-post="/api/student/"
+      hx-ext="json-enc"
+      hx-trigger="submit"
+      hx-target="#output"
+      hx-swap="innerHTML"
+      hx-headers='{"Content-Type": "application/json"}'
+      hx-vals='js:{
+        name: document.querySelector("#add-name").value,
+        email: document.querySelector("#add-email").value,
+        dob: document.querySelector("#add-dob").value
+      }'>
+    <input type="text" id="add-name" placeholder="Name" required>
+    <input type="email" id="add-email" placeholder="Email" required>
+    <input type="date" id="add-dob" placeholder="Date of Birth" required>
+    <button type="submit">Add</button>
+</form>
+
+<!-- Update Student (PUT with query params) -->
+<h3>Update Student</h3>
+<form onsubmit="event.preventDefault();
+    const id = this.id.value;
+    const params = new URLSearchParams();
+    if (this.name.value) params.append('name', this.name.value);
+    if (this.email.value) params.append('email', this.email.value);
+    htmx.ajax('PUT', `/api/student/${id}?${params}`, {
+      target: '#output', swap: 'innerHTML'
+    });">
+    <input type="number" name="id" required placeholder="ID">
+    <input type="text" name="name" placeholder="New Name">
+    <input type="text" name="email" placeholder="New Email">
+    <button type="submit">Update</button>
+</form>
+
+
+<h3>Delete Student</h3>
+<form onsubmit="event.preventDefault(); htmx.ajax('DELETE', '/api/student/' + this.elements['id'].value, {target: '#output', swap: 'innerHTML'})">
+    <div class="form-group">
+        <label>ID: <input type="number" name="id" required></label>
+    </div>
+    <button type="submit">Delete Student</button>
+</form>
+
+<div id="output">
+    <!-- Results from API will be shown here -->
+</div>
+
+</body>
+</html>
